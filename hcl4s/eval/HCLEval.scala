@@ -85,14 +85,16 @@ object HCLEval {
     }
 
     def depsOf(key: String, found: Set[String] = Set.empty): Set[String] = {
-      val newDeps = deps(key) -- found
-      val allDeps = deps(key).union(found)
+      if (deps.contains(key)) {
+        val newDeps = deps(key) -- found
+        val allDeps = deps(key).union(found)
 
-      val result = newDeps.flatMap(depsOf(_, allDeps))
+        val result = newDeps.flatMap(depsOf(_, allDeps))
 
-      if (result.contains(key)) {
-        ctx.throwError("Mutual recursion found in resolution dependencies") // TODO: Scope to value
-      } else result
+        if (result.contains(key)) {
+          ctx.throwError("Mutual recursion found in resolution dependencies") // TODO: Scope to value
+        } else result
+      } else found
     }
 
     val ordered = namedElems.sortWith { case ((name1, _), (name2, _)) =>
