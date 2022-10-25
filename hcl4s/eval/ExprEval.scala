@@ -1,11 +1,12 @@
 package dev.jtrim777.hcl4s.eval
 
-import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteCollection, AbsoluteTerm}
+import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteCollection, AbsoluteTerm, WrappedExpr}
 import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator, UnaryOperator}
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType, operators}
 
 object ExprEval {
   def evaluateExpression(expr: Expression, ctx: Context): AbsoluteTerm = expr match {
+    case WrappedExpr(wrapped) => evaluateExpression(wrapped, ctx.push(wrapped))
     case term: AbsoluteTerm => term
     case operation: Expression.Operation => operation match {
       case Expression.UnaryOp(op, target) => evalUnaryOperation(op, target, ctx)

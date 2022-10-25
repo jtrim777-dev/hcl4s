@@ -9,7 +9,7 @@ sealed trait Expression extends Traceable
 
 object Expression {
   sealed trait Term extends Expression
-  sealed trait AbsoluteTerm extends Expression {
+  sealed trait AbsoluteTerm extends Term {
     def kind: DataType
     def stringify: String
   }
@@ -159,4 +159,14 @@ object Expression {
     override def traceDisplay: String = s"${cond.traceDisplay} ? ${yesVal.traceDisplay} : ${noVal.traceDisplay}"
     override def shortDisplay: String = s"${cond.shortDisplay} ? ... : ..."
   }
+
+  case class WrappedExpr(expr: Expression) extends Term {
+    override def traceType: String = expr.traceType
+
+    override def traceDisplay: String = s"(${expr.traceDisplay})"
+
+    override def shortDisplay: String = s"(${expr.shortDisplay})"
+  }
+
+
 }
