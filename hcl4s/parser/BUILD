@@ -4,11 +4,11 @@ scala_library(
     visibility = ["//hcl4s:__subpackages__"],
     exports = [
         "//hcl4s/lang:lib",
-        "@third_party//3rdparty/jvm/org/parboiled",
+        "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
     ],
     deps = [
         "//hcl4s/lang:lib",
-        "@third_party//3rdparty/jvm/org/parboiled",
+        "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
     ],
 )
 

@@ -1,67 +1,65 @@
-package dev.jtrim777.hcl4s.parser
+package dev.jtrim777
+package hcl4s.parser
 
-import org.parboiled2._
-import dev.jtrim777.hcl4s.lang.tmpl.{TemplateItem => tmpli}
-import dev.jtrim777.hcl4s.lang.tmpl.{Template => tmpl}
-import dev.jtrim777.hcl4s.lang.expr.{Expression => expr}
+import hcl4s.lang.expr.{Expression => expr}
+import hcl4s.lang.tmpl.{Template => tmpl, TemplateItem => tmpli}
 
-class TemplateParser(val input: ParserInput) extends Parser with SymHelpers with IDHelpers with StringBuilding {
-  def Expression: Rule1[expr] = rule {
-    runSubParser(inp => (new ParserImpl(inp)).Expression)
+import fastparse._, JavaWhitespace._
+import FastparseUtils._
+import IDHelpers.ID
+
+object TemplateParser {
+  def Expression[_: P]: Rule1[expr] = Parser.Expression
+
+  def escape[_: P](id: String): Rule1[Boolean] = P {
+    !(id ~~ id) ~ id ~~ "{" ~ "~".!.? ~> {(o:Option[String]) => o.isDefined}
   }
 
-  def escape(id: Char): Rule1[Boolean] = rule {
-    !(ch(id) ~ ch(id)) ~ ch(id) ~ '{' ~ capture('~').? ~ WSOp ~> {(o:Option[String]) => o.isDefined}
+  def endEscape[_: P]: Rule1[Boolean] = P {
+    "~".!.? ~ "}" ~> {(o:Option[String]) => o.isDefined}
   }
 
-  def endEscape: Rule1[Boolean] = rule {
-    WSOp ~ capture('~').? ~ '}' ~> {(o:Option[String]) => o.isDefined}
+  def Interpolation[_: P]: Rule1[tmpli.Interpolation] = P {
+    (escape("$") ~/ Expression ~ endEscape) ~> {data => tmpli.Interpolation(data._1, data._2, data._3)}
   }
 
-  def Interpolation: Rule1[tmpli.Interpolation] = rule {
-    escape('$') ~ Expression ~ endEscape ~> {(sh:Boolean, exp: expr, st:Boolean) => tmpli.Interpolation(sh, exp, st)}
+  def IfElse[_: P]: Rule1[tmpl] = P {
+    escape("%") ~/ "else" ~ endEscape ~ Template ~> {t => t._3}
   }
-
-  def IfElse: Rule1[tmpl] = rule {
-    escape('%') ~ "else".keyword ~ endEscape ~ Template ~> {(_:Boolean, _:Boolean, a: tmpl) => a}
-  }
-  def IfDirective: Rule1[tmpli.TmplIf] = rule {
-    escape('%') ~ "if".keyword ~ Expression ~ endEscape ~
+  def IfDirective[_: P]: Rule1[tmpli.TmplIf] = P {
+    escape("%") ~/ "if" ~ Expression ~ endEscape ~
       Template ~ IfElse.? ~
-      escape('%') ~ WSOp ~ "endif".keyword ~ endEscape ~>
-      {(sh1:Boolean, cond:expr, _: Boolean, tmp: tmpl, tmp2: Option[tmpl], _:Boolean, st2:Boolean) =>
-        tmpli.TmplIf(sh1, cond, tmp, tmp2, st2)}
+      escape("%") ~/ "endif" ~ endEscape ~>
+      {data => tmpli.TmplIf(data._1, data._2, data._4, data._5, data._7)}
   } // TODO: Make stripping work properly
 
-  def ForDirective: Rule1[tmpli.TmplFor] = rule {
-    escape('%') ~ "for".keyword ~ ID ~ (",".sym ~ ID).? ~ "in".keyword ~ Expression ~ endEscape ~
+  def ForDirective[_: P]: Rule1[tmpli.TmplFor] = P {
+    escape("%") ~/ "for" ~ ID ~ ("," ~ ID).? ~ "in" ~ Expression ~ endEscape ~
       Template ~
-      escape('%') ~ "endfor".keyword ~ endEscape ~>
-      {(sh:Boolean, i1:String, i2:Option[String], seq: expr, _:Boolean, t:tmpl, _:Boolean, st:Boolean) =>
-        tmpli.TmplFor(sh, i1, i2, seq, t, st)
-      }
+      escape("%") ~/ "endfor" ~ endEscape ~>
+      {data => tmpli.TmplFor(data._1, data._2, data._3, data._4, data._6, data._8)}
   }
 
-  def Directive: Rule1[tmpli.Directive] = rule {
+  def Directive[_: P]: Rule1[tmpli.Directive] = P {
     ForDirective | IfDirective
   }
 
-  def BaseChar: Rule1[String] = rule {
-    !str("%{") ~ !str("${") ~ capture(ANY)
+  def BaseChar[_: P]: Rule1[String] = P {
+    !"%{" ~ !"${" ~ AnyChar.!
   }
-  def RawLiteral: Rule1[String] = rule {
-    zeroOrMore(BaseChar) ~> {(chars:Seq[String]) => chars.mkString("")}
+  def RawLiteral[_: P]: Rule1[String] = P {
+    BaseChar.repX ~> {(chars:Seq[String]) => chars.mkString("")}
   }
-  def Literal: Rule1[tmpli.Literal] = rule {
-    RawLiteral ~> tmpli.Literal.apply _
+  def Literal[_: P]: Rule1[tmpli.Literal] = P {
+    RawLiteral ~> tmpli.Literal.apply
   }
 
-  def TemplateItem: Rule1[tmpli] = rule {
+  def TemplateItem[_: P]: Rule1[tmpli] = P {
     Interpolation | Directive | Literal
   }
 
-  def Template: Rule1[tmpl] = rule {
-    oneOrMore(TemplateItem) ~ EOI ~> {(items:Seq[tmpli]) => tmpl(items.toList)}
+  def Template[_: P]: Rule1[tmpl] = P {
+    TemplateItem.repX(1) ~ End ~> {(items:Seq[tmpli]) => tmpl(items.toList)}
   }
 }
 

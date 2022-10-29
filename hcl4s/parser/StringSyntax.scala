@@ -1,35 +1,35 @@
 package dev.jtrim777.hcl4s.parser
 
-import org.parboiled2.CharPredicate.HexDigit
-import org.parboiled2._
-
-trait StringSyntax extends Parser with WSHelpers with StringBuilding {
-  import StringSyntax._
-
-  def QuotedString: Rule1[String] = rule {
-    '"' ~ clearSB() ~ Characters ~ "\"".wsl ~ push(sb.toString)
-  }
-
-  def Characters: Rule0 = rule(zeroOrMore(NormalChar | '\\' ~ EscapedChar))
-
-  def NormalChar: Rule0 = rule(!QuoteBackslash ~ ANY ~ appendSB())
-
-  def EscapedChar: Rule0 = rule {
-    QuoteSlashBackSlash ~ appendSB() |
-      'b' ~ appendSB('\b') |
-      'f' ~ appendSB('\f') |
-      'n' ~ appendSB('\n') |
-      'r' ~ appendSB('\r') |
-      't' ~ appendSB('\t') |
-      Unicode ~> { (code:Int) => sb.append(code.asInstanceOf[Char]); () }
-  }
-
-  def Unicode: Rule1[Int] = rule{
-    'u' ~ capture(HexDigit ~ HexDigit ~ HexDigit ~ HexDigit) ~> {(s:String) => java.lang.Integer.parseInt(s, 16)}
-  }
-}
+import fastparse._, NoWhitespace._
+import FastparseUtils._
 
 object StringSyntax {
-  private[StringSyntax] val QuoteBackslash = CharPredicate("\"\\")
-  private[StringSyntax] val QuoteSlashBackSlash = QuoteBackslash ++ "/"
+  private[StringSyntax] def QuoteBackslash[_: P]: Rule0 = CharIn("\"\\\\")
+  private[StringSyntax] def QuoteSlashBackSlash[_: P]: Rule0 = CharIn("\"\\\\/")
+
+  def QuotedString[_: P]: Rule1[String] = P {
+    "\"" ~/ Characters ~ "\"" ~> {chars => chars.mkString("")}
+  }
+
+  def Characters[_: P]: Rule1[Seq[String]] = P {
+    (NormalChar.! | ("\\" ~ EscapedChar)).*
+  }
+
+  def NormalChar[_: P]: Rule0 = P {
+    !QuoteBackslash ~ AnyChar
+  }
+
+  def EscapedChar[_: P]: Rule1[String] = P {
+    QuoteSlashBackSlash.! |
+      P("b") ~> "\b" |
+      P("f") ~> "\f" |
+      P("n") ~> "\n" |
+      P("r") ~> "\r" |
+      P("t") ~> "\t" |
+      Unicode ~> { (code:Int) => code.asInstanceOf[Char].toString }
+  }
+
+  def Unicode[_: P]: Rule1[Int] = P {
+    "u" ~ (CharHexDigit ~ CharHexDigit ~ CharHexDigit ~ CharHexDigit).! ~> {(s:String) => java.lang.Integer.parseInt(s, 16)}
+  }
 }

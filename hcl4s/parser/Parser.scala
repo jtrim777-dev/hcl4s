@@ -6,11 +6,11 @@ import dev.jtrim777.hcl4s.lang.struct
 
 //import org.parboiled2._
 import fastparse._, JavaWhitespace._
-import FastparseUtils._, IDHelpers2._
+import FastparseUtils._, IDHelpers._
 
 import scala.collection.immutable.Seq
 
-object Parser2 {
+object Parser {
 
   def DecLiteral[_: P]: Rule1[String] = P {
     (("-".? ~~ CharDigit19 ~~ CharDigit.repX) | "0").!
@@ -59,8 +59,8 @@ object Parser2 {
   }
 
   def Template[_: P]: Rule1[expr.TmplExpr] = P {
-    StringSyntax2.QuotedString ~> {(str:String) =>
-      val result = parse(str, TemplateParser2.Template(_))
+    StringSyntax.QuotedString ~> {(str:String) =>
+      val result = parse(str, TemplateParser.Template(_))
       expr.TmplExpr(result.get.value)
     }
   }

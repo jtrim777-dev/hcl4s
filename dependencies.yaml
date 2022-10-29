@@ -28,11 +28,6 @@ dependencies:
       lang: scala
       version: "0.8.0"
 
-  org.parboiled:
-    parboiled:
-      lang: scala
-      version: "2.4.0"
-
   org.scala-lang:
     scala:
       lang: scala/unmangled
