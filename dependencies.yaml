@@ -21,6 +21,9 @@ dependencies:
     ammonite_2.13.8:
       lang: scala/unmangled
       version: "2.5.5"
+    fastparse:
+      lang: scala
+      version: "2.2.2"
     pprint:
       lang: scala
       version: "0.8.0"
