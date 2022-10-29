@@ -7,7 +7,7 @@ import dev.jtrim777.hcl4s.lang.expr.{ValueType, Expression => expr}
 import dev.jtrim777.hcl4s.lang.struct
 import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator => bop}
 
-class ParserImpl(val input: ParserInput) extends Parser with SymHelpers with IDHelpers {
+class ParserImpl(val input: ParserInput) extends Parser with SymHelpers with IDHelpers with StringSyntax {
 
   def DecLiteral: Rule1[String] = rule {
     capture(("-".? ~ CharPredicate.Digit19 ~ zeroOrMore(CharPredicate.Digit)) | '0')
@@ -36,7 +36,7 @@ class ParserImpl(val input: ParserInput) extends Parser with SymHelpers with IDH
     capture("null") ~ !(CharPredicate.AlphaNum | '_') ~> {_:String => expr.Literal(ValueType.NullValue)}
   }
 
-  def LitVal: Rule1[expr.Literal] = {
+  def LitVal: Rule1[expr.Literal] = rule {
     IntLiteral | FloatLiteral | BoolLit | NullLit
   }
 
@@ -55,7 +55,9 @@ class ParserImpl(val input: ParserInput) extends Parser with SymHelpers with IDH
     Sequence | Mapping
   }
 
-  def Template: Rule1[expr.TmplExpr] = ???
+  def Template: Rule1[expr.TmplExpr] = rule {
+    QuotedString ~> {(str:String) => run(new TemplateParser(str).Template)} ~> expr.TmplExpr.apply _
+  }
 
   def Variable: Rule1[expr.Variable] = rule {
     ID ~> expr.Variable

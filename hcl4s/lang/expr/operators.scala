@@ -38,4 +38,10 @@ object operators {
   }
   case object And extends LogicalOp("&&", 2, _ && _)
   case object Or extends LogicalOp("||", 1, _ || _)
+
+  val Binaries: List[BinaryOperator[_, _]] = List(
+    Equals, NotEquals, LessThan, LessOrEq, GreaterThan, GreaterOrEq,
+    Add, Subtract, Multiply, Divide, Modulo,
+    And, Or
+  )
 }

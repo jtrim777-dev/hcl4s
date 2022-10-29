@@ -5,12 +5,12 @@ import dev.jtrim777.hcl4s.lang.tmpl.{TemplateItem => tmpli}
 import dev.jtrim777.hcl4s.lang.tmpl.{Template => tmpl}
 import dev.jtrim777.hcl4s.lang.expr.{Expression => expr}
 
-class TemplateParser(val input: ParserInput) extends Parser with SymHelpers with IDHelpers {
+class TemplateParser(val input: ParserInput) extends Parser with SymHelpers with IDHelpers with StringBuilding {
   def Expression: Rule1[expr] = rule {
     runSubParser(inp => (new ParserImpl(inp)).Expression)
   }
 
-  def escape(id: Char): Rule1[Boolean] = {
+  def escape(id: Char): Rule1[Boolean] = rule {
     !(ch(id) ~ ch(id)) ~ ch(id) ~ '{' ~ capture('~').? ~ WSOp ~> {(o:Option[String]) => o.isDefined}
   }
 
@@ -46,15 +46,22 @@ class TemplateParser(val input: ParserInput) extends Parser with SymHelpers with
     ForDirective | IfDirective
   }
 
-  def BaseChar: Rule1[Char] = rule {
-    !str("%{") ~ !str("${")
+  def BaseChar: Rule1[String] = rule {
+    !str("%{") ~ !str("${") ~ capture(ANY)
   }
   def RawLiteral: Rule1[String] = rule {
+    zeroOrMore(BaseChar) ~> {(chars:Seq[String]) => chars.mkString("")}
+  }
+  def Literal: Rule1[tmpli.Literal] = rule {
+    RawLiteral ~> tmpli.Literal.apply _
+  }
 
+  def TemplateItem: Rule1[tmpli] = rule {
+    Interpolation | Directive | Literal
   }
 
   def Template: Rule1[tmpl] = rule {
-    ???
+    oneOrMore(TemplateItem) ~ EOI ~> {(items:Seq[tmpli]) => tmpl(items.toList)}
   }
 }
 
