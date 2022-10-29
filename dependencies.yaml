@@ -9,6 +9,7 @@ options:
     - id: "confluent"
       type: "default"
       url: https://packages.confluent.io/maven/
+  strictVisibility: true
 
 dependencies:
   com.chuusai:
@@ -17,32 +18,23 @@ dependencies:
       version: "2.3.3"
 
   com.lihaoyi:
+    ammonite_2.13.8:
+      lang: scala/unmangled
+      version: "2.5.5"
     pprint:
       lang: scala
-      version: "0.5.6"
+      version: "0.8.0"
 
   org.parboiled:
     parboiled:
       lang: scala
       version: "2.4.0"
 
-replacements:
   org.scala-lang:
-    scala-compiler:
+    scala:
       lang: scala/unmangled
-      target: "@io_bazel_rules_scala_scala_compiler//:io_bazel_rules_scala_scala_compiler"
-    scala-library:
-      lang: scala/unmangled
-      target: "@io_bazel_rules_scala_scala_library//:io_bazel_rules_scala_scala_library"
-    scala-reflect:
-      lang: scala/unmangled
-      target: "@io_bazel_rules_scala_scala_reflect//:io_bazel_rules_scala_scala_reflect"
+      modules: [ "compiler", "library", "reflect" ]
 
   org.scala-lang.modules:
-    scala-parser-combinators:
-      lang: scala
-      target:
-        "@io_bazel_rules_scala_scala_parser_combinators//:io_bazel_rules_scala_scala_parser_combinators"
     scala-xml:
       lang: scala
-      target: "@io_bazel_rules_scala_scala_xml//:io_bazel_rules_scala_scala_xml"

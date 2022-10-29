@@ -31,18 +31,18 @@ load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies", "rules_
 rules_proto_dependencies()
 rules_proto_toolchains()
 
-load("@io_bazel_rules_scala//scala:toolchains.bzl", "scala_register_toolchains")
-scala_register_toolchains()
+load("//3rdparty:workspace.bzl", "maven_dependencies")
+maven_dependencies()
+
+load("//3rdparty:target_file.bzl", "build_external_workspace")
+build_external_workspace(name = "third_party")
+
+register_toolchains("//tools:tools_scala")
 
 # optional: setup ScalaTest toolchain and dependencies
 load("@io_bazel_rules_scala//testing:scalatest.bzl", "scalatest_repositories", "scalatest_toolchain")
 scalatest_repositories()
 scalatest_toolchain()
-
-load("//3rdparty:workspace.bzl", "maven_dependencies")
-maven_dependencies()
-load("//3rdparty:target_file.bzl", "build_external_workspace")
-build_external_workspace(name = "third_party")
 
 load("//tools:bazeldist.bzl", "import_bazeldist")
 import_bazeldist()
@@ -51,18 +51,16 @@ load("@bazeldist//maven:deps.bzl", "maven_artifacts_with_versions")
 load("@rules_jvm_external//:defs.bzl", "maven_install")
 maven_install(
     artifacts = maven_artifacts_with_versions,
+    fetch_sources = True,
     repositories = [
         "https://repo1.maven.org/maven2",
     ],
     strict_visibility = True,
     version_conflict_policy = "pinned",
-    fetch_sources = True,
 )
 
 load("@bazeldist//common:rules.bzl", "workspace_refs")
-workspace_refs(
-    name = "repo_workspace_refs"
-)
+workspace_refs( name = "repo_workspace_refs" )
 
 load("@io_bazel_rules_kotlin//kotlin:kotlin.bzl", "kotlin_repositories", "kt_register_toolchains")
 kotlin_repositories()
