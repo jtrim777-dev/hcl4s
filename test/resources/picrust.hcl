@@ -21,6 +21,10 @@ image "alpha" {
     partition "vault" {
       fill = true
       format = "fat32"
+
+      ablock "label" {
+        foo = "bar"
+      }
     }
 
     config {

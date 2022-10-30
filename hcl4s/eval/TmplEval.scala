@@ -58,7 +58,7 @@ private[eval] object TmplEval {
           val nctx = secID match {
             case Some(secID) =>
               ctx.push(resolve)
-                .enscope(primID, key)
+                .enscope(primID, Expression.AttrKey(key))
                 .enscope(secID, value)
             case None => ctx.push(resolve)
               .enscope(primID, value)

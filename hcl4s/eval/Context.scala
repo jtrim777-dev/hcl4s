@@ -9,5 +9,7 @@ private[eval] case class Context(scope: ScopeStack, trace: Trace,
 
   def enscope(key: String, value: AbsoluteTerm): Context = this.copy(scope = scope.enscope(key, value))
 
+  def enscope(key: List[String], value: AbsoluteTerm): Context = this.copy(scope = scope.enscope(key, value))
+
   def push(item: Traceable): Context = this.copy(scope = scope.push(), trace = trace.push(item))
 }

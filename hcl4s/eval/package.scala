@@ -21,6 +21,6 @@ package object eval {
   }
 
   case class HCLEvaluationException(message: String, trace: Trace) extends Exception {
-    override def getLocalizedMessage: String = message + "\n" + trace.format.mkString("\n")
+    override def getLocalizedMessage: String = message + "\n" + trace.format.mkString("  ", "\n  ", "\n--------------")
   }
 }

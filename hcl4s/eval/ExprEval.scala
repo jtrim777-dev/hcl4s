@@ -1,6 +1,6 @@
 package dev.jtrim777.hcl4s.eval
 
-import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteCollection, AbsoluteTerm, WrappedExpr}
+import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteCollection, AbsoluteTerm, AttrKey, WrappedExpr}
 import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator, UnaryOperator}
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType, operators}
 
@@ -21,7 +21,7 @@ private[eval] object ExprEval {
       case collection: Expression.Collection => collection match {
         case Expression.SequenceT(items) => Expression.AbsSequence(items.map(i => evaluateExpression(i, ctx.push(i))))
         case Expression.MappingT(items) => Expression.AbsMapping(items.map { case (k, v) =>
-          (evaluateExpression(k, ctx.push(k)), evaluateExpression(v, ctx.push(v)))
+          (asAttrKey(k, ctx).value, evaluateExpression(v, ctx.push(v)))
         })
       }
       case Expression.TmplExpr(template) => TmplEval.evaluateTemplate(template, ctx)
@@ -120,7 +120,7 @@ private[eval] object ExprEval {
           val nctx = fs.secID match {
             case Some(secID) =>
               ctx.push(fs.valExpr)
-                .enscope(fs.primID, key)
+                .enscope(fs.primID, AttrKey(key))
                 .enscope(secID, value)
             case None => ctx.push(fs.valExpr)
               .enscope(fs.primID, value)
@@ -144,16 +144,15 @@ private[eval] object ExprEval {
         values.zipWithIndex.flatMap { case (value, i) =>
           val nctx = fm.secID match {
             case Some(secID) =>
-              ctx.push(fm.valExpr)
-                .enscope(fm.primID, Expression.Literal(ValueType.IntegerValue(i)))
+              ctx.enscope(fm.primID, Expression.Literal(ValueType.IntegerValue(i)))
                 .enscope(secID, value)
-            case None => ctx.push(fm.valExpr)
-              .enscope(fm.primID, value)
+            case None => ctx.enscope(fm.primID, value)
           }
           val evalCond = fm.cond.map(c => evaluateExpression(c, nctx.push(c))).getOrElse(Expression.Literal(ValueType.BooleanValue(true)))
           evalCond match {
             case Expression.Literal(ValueType.BooleanValue(flag)) => if (flag) {
-              Some(evaluateExpression(fm.keyExpr, nctx) -> evaluateExpression(fm.valExpr, nctx))
+              val nkey = asAttrKey(fm.keyExpr, nctx).value
+              Some(nkey -> evaluateExpression(fm.valExpr, nctx.push(fm.valExpr)))
             } else None
             case _ => nctx.throwError("Filter in for comprehension must evaluate to a boolean")
           }
@@ -162,16 +161,15 @@ private[eval] object ExprEval {
         values.toList.flatMap { case (key, value) =>
           val nctx = fm.secID match {
             case Some(secID) =>
-              ctx.push(fm.valExpr)
-                .enscope(fm.primID, key)
+              ctx.enscope(fm.primID, AttrKey(key))
                 .enscope(secID, value)
-            case None => ctx.push(fm.valExpr)
-              .enscope(fm.primID, value)
+            case None => ctx.enscope(fm.primID, value)
           }
           val evalCond = fm.cond.map(c => evaluateExpression(c, nctx.push(c))).getOrElse(Expression.Literal(ValueType.BooleanValue(true)))
           evalCond match {
             case Expression.Literal(ValueType.BooleanValue(flag)) => if (flag) {
-              Some(evaluateExpression(fm.keyExpr, nctx) -> evaluateExpression(fm.valExpr, nctx))
+              val nkey = asAttrKey(fm.keyExpr, nctx).value
+              Some(nkey -> evaluateExpression(fm.valExpr, nctx.push(fm.valExpr)))
             } else None
             case _ => nctx.throwError("Filter in for comprehension must evaluate to a boolean")
           }
@@ -190,6 +188,16 @@ private[eval] object ExprEval {
     Expression.AbsMapping(asMap)
   }
 
+  private def asAttrKey(expr: Expression, ctx: Context): Expression.AttrKey = {
+    val xctx = ctx.push(expr)
+    evaluateExpression(expr, ctx) match {
+      case l:Expression.Literal => AttrKey(l.stringify)
+      case k:AttrKey => k
+      case _: AbsoluteCollection => xctx.throwError("Key expression cannot resolve to a collection")
+      case Expression.ResolvedTmpl(value) => AttrKey(value)
+    }
+  }
+
   private def evalIndex(target: AbsoluteTerm, index: Expression, ctx: Context): AbsoluteTerm = {
     val ti = evaluateExpression(index, ctx.push(index))
 
@@ -204,9 +212,9 @@ private[eval] object ExprEval {
   }
   private def evalAttr(target: AbsoluteTerm, attr: String, ctx: Context): AbsoluteTerm = {
     target match {
-      case Expression.AbsMapping(values) => values.get(Expression.AttrKey(attr)) match {
+      case Expression.AbsMapping(values) => values.get(attr) match {
         case Some(value) => value
-        case None => ctx.throwError(s"Map $values has no key $attr")
+        case None => ctx.throwError(s"The object ${values.mkString("{", ", ", "}")} has no key $attr")
       }
       case _ => ctx.throwError("The target for an attribute access must be a map")
     }

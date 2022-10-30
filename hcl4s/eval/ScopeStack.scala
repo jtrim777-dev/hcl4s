@@ -14,6 +14,8 @@ private[eval] case class ScopeStack(head: Scope, tail: Option[ScopeStack]) {
   def get(symbol: String): AbsoluteTerm = lookup(symbol).get
 
   def enscope(key: String, value: AbsoluteTerm): ScopeStack = this.copy(head = head.enscope(key, value))
+
+  def enscope(key: List[String], value: AbsoluteTerm): ScopeStack = this.copy(head = head.enscope(key, value))
 }
 
 private[eval] object ScopeStack {

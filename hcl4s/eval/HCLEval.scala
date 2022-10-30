@@ -1,6 +1,6 @@
 package dev.jtrim777.hcl4s.eval
 
-import dev.jtrim777.hcl4s.lang.expr.Expression.AbsoluteTerm
+import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteTerm, AttrKey}
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType}
 import dev.jtrim777.hcl4s.lang.struct.BodyElemT.{AttributeT, BlockT}
 import dev.jtrim777.hcl4s.lang.struct._
@@ -33,7 +33,7 @@ object HCLEval {
     case HCLValue.Null => Expression.Literal(ValueType.NullValue)
     case HCLValue.HCLList(values) => Expression.AbsSequence(values.map(valueToTerm))
     case HCLValue.HCLObject(data) => Expression.AbsMapping(data.map { case (k,v) =>
-      (Expression.AttrKey(k), valueToTerm(v))
+      (k, valueToTerm(v))
     })
   }
 
@@ -47,7 +47,7 @@ object HCLEval {
     case coll: Expression.AbsoluteCollection => coll match {
       case Expression.AbsSequence(items) => HCLValue.HCLList(items.map(termToValue))
       case Expression.AbsMapping(items) => HCLValue.HCLObject(items.map { case (k, v) =>
-        (k.stringify, termToValue(v))
+        (k, termToValue(v))
       })
     }
     case Expression.ResolvedTmpl(text) => HCLValue.Text(text)
@@ -108,12 +108,18 @@ object HCLEval {
     }
 
     val (_, rez) = ordered.foldLeft((ctx, List.empty[ResolvedBody])) { case ((ictx, accum), (name, elem)) =>
-      val resolved: ResolvedBody = elem match {
-        case a:Attribute => evaluateAttribute(a, ictx.push(a))
-        case b:Block => evaluateBlock(b, ictx.push(b))
+      val (resolved, nctx): (ResolvedBody, Context) = elem match {
+        case a:Attribute =>
+          val rez = evaluateAttribute(a, ictx.push(a))
+          val ctx = name.map(ictx.enscope(_, elemToValue(rez, ictx))).getOrElse(ictx)
+          (rez, ctx)
+        case b:Block =>
+          val rez = evaluateBlock(b, ictx.push(b))
+          val key = b.kind :: b.labels
+          val ctx = name.map(_ => ictx.enscope(key, elemToValue(rez, ictx))).getOrElse(ictx)
+          (rez, ctx)
       }
       val naccum = resolved :: accum
-      val nctx = name.map(ictx.enscope(_, elemToValue(resolved, ictx))).getOrElse(ictx)
       (nctx, naccum)
     }
 
@@ -124,7 +130,10 @@ object HCLEval {
   private def scanElements[T <: Expression](elements: List[BodyElemT[T]], ctx: Context): List[(Option[String], BodyElemT[T])] = {
     elements.map {
       case a: Attribute => Some(a.name) -> a
-      case b: Block => if (ctx.scopeBlockTags && b.labels.nonEmpty) Some(b.labels.head) -> b else None -> b
+      case b: Block => if (ctx.scopeBlockTags) {
+        val k = b.kind + (if (b.labels.nonEmpty) b.labels.mkString(".", ".", "") else "")
+        Some(k) -> b
+      } else None -> b
     }
   }
 
@@ -143,8 +152,8 @@ object HCLEval {
   private def elemToValue(elem: ResolvedBody, ctx: Context): AbsoluteTerm = elem match {
     case a:ResolvedAttribute => a.value
     case b:ResolvedBlock =>
-      val mapi = scanElements[AbsoluteTerm](b.content, ctx).foldLeft(Map.empty[AbsoluteTerm, AbsoluteTerm]) { case (accum, (nameo, value)) =>
-        nameo.map(s => accum.updated(Expression.AttrKey(s), elemToValue(value, ctx))).getOrElse(accum)
+      val mapi = scanElements[AbsoluteTerm](b.content, ctx).foldLeft(Map.empty[String, AbsoluteTerm]) { case (accum, (nameo, value)) =>
+        nameo.map(s => accum.updated(s, elemToValue(value, ctx))).getOrElse(accum)
       }
       Expression.AbsMapping(mapi)
   }

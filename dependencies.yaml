@@ -28,6 +28,11 @@ dependencies:
       lang: scala
       version: "0.8.0"
 
+  org.apache.commons:
+    commons-text:
+      lang: java
+      version: "1.10.0"
+
   org.scala-lang:
     scala:
       lang: scala/unmangled

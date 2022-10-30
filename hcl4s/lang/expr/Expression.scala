@@ -54,14 +54,27 @@ object Expression {
     override def traceDisplay: String = items.map(_.traceDisplay).mkString("[", ", ", "]")
     override def shortDisplay: String = if (items.nonEmpty) s"[${items.head.shortDisplay},...]" else s"[]"
   }
-  case class AbsMapping(items: Map[AbsoluteTerm, AbsoluteTerm]) extends AbsoluteCollection {
+  case class AbsMapping(items: Map[String, AbsoluteTerm]) extends AbsoluteCollection {
     override def kind: DataType = DataType.ValueMap
 
     override def stringify: String = traceDisplay
 
     override def traceType: String = "mapping"
-    override def traceDisplay: String = items.map(p => p._1.traceDisplay + ": " + p._2.traceDisplay).mkString("{", ", ", "}")
-    override def shortDisplay: String = if (items.nonEmpty) s"{${items.head._1.shortDisplay}: ${items.head._2.shortDisplay},...}" else s"[]"
+    override def traceDisplay: String = items.map(p => p._1 + ": " + p._2.traceDisplay).mkString("{", ", ", "}")
+    override def shortDisplay: String = if (items.nonEmpty) s"{${items.head._1}: ${items.head._2.shortDisplay},...}" else s"[]"
+
+    def add(path: List[String], value: AbsoluteTerm): AbsMapping = {
+      if (path.isEmpty) {
+        throw new IllegalArgumentException("Cannot add value with empty key path")
+      } else if (path.length == 1) {
+        this.copy(items = items.updated(path.head, value))
+      } else {
+        items.get(path.head) match {
+          case Some(m:AbsMapping) => this.copy(items = items.updated(path.head, m.add(path.tail, value)))
+          case None => this.copy(items = items.updated(path.head, AbsMapping(Map.empty).add(path.tail, value)))
+        }
+      }
+    }
   }
 
   case class Variable(id: String) extends Term {
