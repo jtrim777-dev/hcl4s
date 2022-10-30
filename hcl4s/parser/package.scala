@@ -14,4 +14,13 @@ package object parser {
   }
 
   def load(path: Path): HCLSource = parse(Files.readString(path))
+
+  def attemptParse(source: String): Either[Parsed.Failure, HCLSource] = {
+    libparse(source, Parser.HCL(_)) match {
+      case Parsed.Success(value, _) => Right(value)
+      case failure: Parsed.Failure => Left(failure)
+    }
+  }
+
+  def attemptLoad(path: Path): Either[Parsed.Failure, HCLSource] = attemptParse(Files.readString(path))
 }

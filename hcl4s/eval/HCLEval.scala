@@ -8,7 +8,7 @@ import dev.jtrim777.hcl4s.model.{HCLBlock, HCLBody, HCLValue}
 
 object HCLEval {
   def evaluate(source: HCLSource, externalVariables: Map[String, HCLValue] = Map.empty,
-               functions: Map[String, HCLFunction] = Map.empty, scopeBlockTags: Boolean = false): HCLBody = {
+               functions: Map[String, HCLFunction] = Map.empty, scopeBlockTags: Boolean = true): HCLBody = {
     val output = innerEvaluate(source, externalVariables.map(p => (p._1, valueToTerm(p._2))), functions, scopeBlockTags)
 
     convertBlock(output).body

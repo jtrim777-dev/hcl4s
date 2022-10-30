@@ -4,7 +4,7 @@ import dev.jtrim777.hcl4s.lang.expr.Expression.AbsoluteTerm
 import dev.jtrim777.hcl4s.lang.expr.operators._
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType}
 
-object operations {
+private[eval] object operations {
   def evaluateOperation(op: BinaryOperator[_, _], lhs: AbsoluteTerm, rhs: AbsoluteTerm, ctx: Context): AbsoluteTerm = op match {
     case op: CompOp => comparison(op, lhs, rhs, ctx)
     case op: ArithOp => arithmetic(op, lhs, rhs, ctx)

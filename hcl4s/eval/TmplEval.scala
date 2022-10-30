@@ -4,7 +4,7 @@ import dev.jtrim777.hcl4s.lang.expr.Expression.ResolvedTmpl
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType}
 import dev.jtrim777.hcl4s.lang.tmpl.{Template, TemplateItem}
 
-object TmplEval {
+private[eval] object TmplEval {
   def evaluateTemplate(tmpl: Template, ctx: Context): ResolvedTmpl = {
     val items = tmpl.content.toArray
     ResolvedTmpl(items.indices.map { i =>

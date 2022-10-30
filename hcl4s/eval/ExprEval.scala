@@ -4,7 +4,7 @@ import dev.jtrim777.hcl4s.lang.expr.Expression.{AbsoluteCollection, AbsoluteTerm
 import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator, UnaryOperator}
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType, operators}
 
-object ExprEval {
+private[eval] object ExprEval {
   def evaluateExpression(expr: Expression, ctx: Context): AbsoluteTerm = expr match {
     case WrappedExpr(wrapped) => evaluateExpression(wrapped, ctx.push(wrapped))
     case term: AbsoluteTerm => term
