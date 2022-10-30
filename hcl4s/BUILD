@@ -1,23 +1,35 @@
 scala_library(
+  name = "core-lib",
+  srcs = [],
+  exports = [
+    "//hcl4s/lang:lib",
+    "//hcl4s/model:lib",
+    "//hcl4s/eval:lib",
+  ],
+  deps = [
+    "//hcl4s/lang:lib",
+    "//hcl4s/model:lib",
+    "//hcl4s/eval:lib",
+  ],
+  visibility = ["//visibility:public"],
+  tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-core_2.13:{pom_version}"],
+)
+
+scala_library(
   name = "lib",
   srcs = glob(["*.scala"]),
   exports = [
-    "//hcl4s/eval:lib",
+    ":core-lib",
     "//hcl4s/parser:lib",
-    "@third_party//3rdparty/jvm/com/lihaoyi:pprint",
   ],
   deps = [
-    "//hcl4s/eval:lib",
+    ":core-lib",
     "//hcl4s/parser:lib",
-    "@third_party//3rdparty/jvm/com/lihaoyi:pprint",
-  ]
+  ],
+  visibility = ["//visibility:public"],
+  tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s_2.13:{pom_version}"],
 )
 
-scala_binary(
-    name = "hcl4s-test",
-    deps = [":lib"],
-    main_class = "dev.jtrim777.hcl4s.HCLParser"
-)
 
 scala_binary(
     name = "repl",
