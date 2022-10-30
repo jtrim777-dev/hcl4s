@@ -12,5 +12,5 @@ scala_library(
         "//hcl4s/model:lib",
         "//hcl4s/util:lib",
     ],
-    visibility = ["//hcl4s:__subpackages__"]
+    visibility = ["//visibility:public"]
 )

@@ -279,13 +279,14 @@ object ExprEval {
         case Right(value) => keysUsed(set, value)
         case Left(_) => List.empty
       }.toSet
+      case _: AbsoluteTerm => Set.empty
     }
-    case _: AbsoluteTerm => Set.empty
     case operation: Expression.Operation => operation match {
       case Expression.UnaryOp(_, target) => keysUsed(set, target)
       case Expression.BinaryOp(lhs, _, rhs) => keysUsed(set, lhs) ++ keysUsed(set, rhs)
     }
     case Expression.Conditional(cond, yesVal, noVal) =>
       keysUsed(set, cond) ++ keysUsed(set, yesVal) ++ keysUsed(set, noVal)
+    case _ => Set.empty
   }
 }

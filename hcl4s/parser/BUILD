@@ -1,7 +1,7 @@
 scala_library(
     name = "lib",
     srcs = glob(["*.scala"]),
-    visibility = ["//hcl4s:__subpackages__"],
+    visibility = ["//visibility:public"],
     exports = [
         "//hcl4s/lang:lib",
         "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",

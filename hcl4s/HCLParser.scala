@@ -12,7 +12,7 @@ object HCLParser extends App {
       "inherits" := seq("ci-corretto-base"),
       "tags" := seq(
         "circleci/corretto:8",
-        tmpl(interpolate("registry".asVar) ~ "/".asLit ~ interpolate("repo".asVar) ~ "/corretto:11".asLit)
+        tmpl(interpolate("registry".asVar), "/".asLit, interpolate("repo".asVar), "/corretto:11".asLit)
       ),
       "args" := obj(
         "JDK_VERSION" ~> 17

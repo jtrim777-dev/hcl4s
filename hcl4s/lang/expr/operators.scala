@@ -44,4 +44,10 @@ object operators {
     Add, Subtract, Multiply, Divide, Modulo,
     And, Or
   )
+
+  sealed trait PostfixOp
+  case class AccessOp(key: String) extends PostfixOp
+  case class IndexOp(value: Expression) extends PostfixOp
+  case object ASplatOp extends PostfixOp
+  case object FSplatOp extends PostfixOp
 }

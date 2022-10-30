@@ -18,3 +18,13 @@ scala_binary(
     deps = [":lib"],
     main_class = "dev.jtrim777.hcl4s.HCLParser"
 )
+
+scala_binary(
+    name = "repl",
+    srcs = [],
+    main_class = "ammonite.Main",
+    deps = [
+        ":lib",
+        "@third_party//3rdparty/jvm/com/lihaoyi:ammonite_2_13_8",
+    ],
+)

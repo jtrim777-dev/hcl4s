@@ -3,7 +3,7 @@ package dev.jtrim777.hcl4s.parser
 import fastparse._, NoWhitespace._
 import FastparseUtils._
 
-object StringSyntax {
+private[parser] object StringSyntax {
   private[StringSyntax] def QuoteBackslash[_: P]: Rule0 = CharIn("\"\\\\")
   private[StringSyntax] def QuoteSlashBackSlash[_: P]: Rule0 = CharIn("\"\\\\/")
 
@@ -12,7 +12,7 @@ object StringSyntax {
   }
 
   def Characters[_: P]: Rule1[Seq[String]] = P {
-    (NormalChar.! | ("\\" ~ EscapedChar)).*
+    (NormalChar.! | ("\\" ~ EscapedChar)).rep
   }
 
   def NormalChar[_: P]: Rule0 = P {

@@ -1,10 +1,11 @@
 package dev.jtrim777.hcl4s.parser
 
+import dev.jtrim777.hcl4s.lang.expr.Expression.Term
 import dev.jtrim777.hcl4s.lang.expr.{Expression, ValueType}
-import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator, UnaryOperator}
+import dev.jtrim777.hcl4s.lang.expr.operators.{BinaryOperator, PostfixOp, UnaryOperator}
 import dev.jtrim777.hcl4s.lang.expr.operators
 
-object helpers {
+private[parser] object helpers {
   def parseNumber(txt: String): Expression.Literal = {
     if (txt.contains(".")) {
       Expression.Literal(ValueType.FloatingValue(txt.toDouble))
@@ -29,5 +30,25 @@ object helpers {
 
   def parseBinOperator(raw: String): BinaryOperator[_, _] = {
     operators.Binaries.find(_.id == raw).get
+  }
+
+  def combineTerm(base: Term, ops: Seq[PostfixOp]): Term = {
+    if (ops.isEmpty) base else {
+      val next = ops.head match {
+        case operators.AccessOp(key) => base match {
+          case Expression.AttrSplat(tgt, exts) => Expression.AttrSplat(tgt, exts :+ key)
+          case Expression.FullSplat(tgt, exts) => Expression.FullSplat(tgt, exts :+ Left(key))
+          case _ => Expression.GetAttr(base, key)
+        }
+        case operators.IndexOp(value) => base match {
+          case Expression.FullSplat(tgt, exts) => Expression.FullSplat(tgt, exts :+ Right(value))
+          case _ => Expression.Index(base, value)
+        }
+        case operators.ASplatOp => Expression.AttrSplat(base, List.empty)
+        case operators.FSplatOp => Expression.FullSplat(base, List.empty)
+      }
+
+      combineTerm(next, ops.tail)
+    }
   }
 }
