@@ -30,4 +30,6 @@ object HCLValue {
   object HCLObject {
     val Empty: HCLObject = HCLObject(Map.empty)
   }
+
+  case class BlockReference(path: List[String]) extends HCLValue
 }

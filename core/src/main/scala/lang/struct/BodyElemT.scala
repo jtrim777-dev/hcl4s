@@ -24,5 +24,7 @@ object BodyElemT {
     }
 
     override def shortDisplay: String = traceDisplay
+
+    def key: String = kind + (if (labels.isEmpty) "" else labels.mkString(".", ".", ""))
   }
 }

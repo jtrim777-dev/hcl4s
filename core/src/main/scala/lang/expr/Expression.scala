@@ -2,6 +2,7 @@ package dev.jtrim777.hcl4s.lang.expr
 
 import dev.jtrim777.hcl4s.lang.DataType
 import dev.jtrim777.hcl4s.lang.expr.operators._
+import dev.jtrim777.hcl4s.lang.struct.{Block, ResolvedBlock}
 import dev.jtrim777.hcl4s.lang.tmpl.Template
 import dev.jtrim777.hcl4s.util.Traceable
 
@@ -28,6 +29,16 @@ object Expression {
     override def stringify: String = value
 
     override def traceType: String = "identifier"
+    override def traceDisplay: String = stringify
+    override def shortDisplay: String = stringify
+  }
+
+  case class BlockRef(block: ResolvedBlock) extends AbsoluteTerm {
+    override def kind: DataType = DataType.NotAType
+    override def stringify: String = "&" + block.kind + (if (block.labels.nonEmpty) block.labels.mkString(".", ".", "") else "")
+
+    override def traceType: String = "block_reference"
+
     override def traceDisplay: String = stringify
     override def shortDisplay: String = stringify
   }

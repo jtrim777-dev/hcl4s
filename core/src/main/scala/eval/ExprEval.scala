@@ -230,7 +230,14 @@ private[eval] object ExprEval {
         case Some(value) => value
         case None => ctx.throwError(s"The object ${values.mkString("{", ", ", "}")} has no key $attr")
       }
-      case _ => ctx.throwError("The target for an attribute access must be a map")
+      case Expression.BlockRef(block) => {
+        val map = HCLEval.convertBlock(block).body.toObject.data
+        map.get(attr) match {
+          case Some(value) => HCLEval.valueToTerm(value)
+          case None => ctx.throwError(s"The object from block ${block.key} has no key $attr")
+        }
+      }
+      case _ => ctx.throwError("The target for an attribute access must be an object")
     }
   }
 

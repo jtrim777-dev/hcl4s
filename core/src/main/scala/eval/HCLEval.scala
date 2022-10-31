@@ -16,7 +16,7 @@ object HCLEval {
     convertBlock(output).body
   }
 
-  private def convertBlock(block: ResolvedBlock): HCLBlock = {
+  private[eval] def convertBlock(block: ResolvedBlock): HCLBlock = {
     val blocks = block.content.collect {
       case b: ResolvedBlock => b
     }.map(convertBlock)
@@ -28,7 +28,7 @@ object HCLEval {
     HCLBlock(block.kind, block.labels, HCLBody(attrs.toMap, blocks))
   }
 
-  private def valueToTerm(value: HCLValue): AbsoluteTerm = value match {
+  private[eval] def valueToTerm(value: HCLValue): AbsoluteTerm = value match {
     case HCLValue.Number(value) => Expression.Literal(ValueType.FloatingValue(value))
     case HCLValue.Bool(value) => Expression.Literal(ValueType.BooleanValue(value))
     case HCLValue.Text(value) => Expression.ResolvedTmpl(value)
@@ -39,7 +39,7 @@ object HCLEval {
     })
   }
 
-  private def termToValue(term: AbsoluteTerm): HCLValue = term match {
+  private[eval] def termToValue(term: AbsoluteTerm): HCLValue = term match {
     case Expression.Literal(value) => value match {
       case num: ValueType.NumericValue[_] => HCLValue.Number(num.asDouble)
       case ValueType.BooleanValue(b) => HCLValue.Bool(b)
@@ -53,6 +53,7 @@ object HCLEval {
       })
     }
     case Expression.ResolvedTmpl(text) => HCLValue.Text(text)
+    case Expression.BlockRef(block) => HCLValue.BlockReference(block.key.split('.').toList)
   }
 
   private def innerEvaluate(hcl: HCLSource, scope: Map[String, AbsoluteTerm],
@@ -154,10 +155,6 @@ object HCLEval {
 
   private def elemToValue(elem: ResolvedBody, ctx: Context): AbsoluteTerm = elem match {
     case a:ResolvedAttribute => a.value
-    case b:ResolvedBlock =>
-      val mapi = scanElements[AbsoluteTerm](b.content, ctx).foldLeft(Map.empty[String, AbsoluteTerm]) { case (accum, (nameo, value)) =>
-        nameo.map(s => accum.updated(s, elemToValue(value, ctx))).getOrElse(accum)
-      }
-      Expression.AbsMapping(mapi)
+    case b:ResolvedBlock => Expression.BlockRef(b)
   }
 }

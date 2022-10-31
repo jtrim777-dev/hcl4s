@@ -23,14 +23,15 @@ data "consul_service_health" "es_health" {
   //TODO rest or transport?
   name = "es-transport-${count + 1}"
   passing = true
-  depends_on = ["nomad_job.elasticsearch"]
+  depends_on = [nomad_job.elasticsearch]
   wait_for = "300s"
+  derp = nomad_job.elasticsearch.count
 }
 
 data "consul_service_health" "kibana_health" {
   count = var.enable ? 1 : 0
   name = "kibana"
   passing = true
-  depends_on = ["nomad_job.kibana"]
+  depends_on = [nomad_job.kibana]
   wait_for = "300s"
 }
