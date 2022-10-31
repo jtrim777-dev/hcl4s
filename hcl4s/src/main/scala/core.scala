@@ -1,12 +1,12 @@
-package dev.jtrim777
+package dev.jtrim777.hcl4s
 
-import hcl4s.eval.HCLFunction
-import hcl4s.model.{HCLBody, HCLValue}
-import hcl4s.util.HCLError
+import eval.HCLFunction
+import model.{HCLBody, HCLValue}
+import util.HCLError
 
 import java.nio.file.Path
 
-package object hcl4s {
+object core {
   def fromFile(path: Path, env: Map[String, HCLValue] = Map.empty,
                functions: Map[String, HCLFunction] = Map.empty): Either[HCLError, HCLBody] = for {
     source <- parser.attemptLoad(path)
