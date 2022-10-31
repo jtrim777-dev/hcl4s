@@ -10,7 +10,7 @@ import dev.jtrim777.hcl4s.util.Trace
 object HCLEval {
   def evaluate(source: HCLSource, externalVariables: Map[String, HCLValue] = Map.empty,
                functions: Map[String, HCLFunction] = Map.empty, scopeBlocks: Boolean = true,
-               blockNameStrategy: Block => Option[String] = Context.DefaultBNStrat): HCLBody = {
+               blockNameStrategy: BlockNameStrategy = Context.DefaultBNStrat): HCLBody = {
     val output = innerEvaluate(source, externalVariables.map(p => (p._1, valueToTerm(p._2))), functions, scopeBlocks, blockNameStrategy)
 
     convertBlock(output).body
@@ -58,7 +58,7 @@ object HCLEval {
 
   private def innerEvaluate(hcl: HCLSource, scope: Map[String, AbsoluteTerm],
                functions: Map[String, HCLFunction], scopeBlocks: Boolean,
-                            blockNameStrategy: Block => Option[String]): ResolvedBlock = {
+                            blockNameStrategy: BlockNameStrategy): ResolvedBlock = {
     val rootBlock = BlockT(".", List.empty, hcl.elements)
     val ctx = Context(ScopeStack(scope), Trace.empty, functions, scopeBlocks, blockNameStrategy)
 
@@ -143,7 +143,7 @@ object HCLEval {
 
   // Determine if the element used the given symbol
   private def keysUsed(set: Set[String], element: BodyElem, ctx: Context): Set[String] = element match {
-    case a:Attribute => ExprEval.keysUsed(set, a.value)
+    case a:Attribute => ExprEval.keysUsed(set, a.value, ctx)
     case b:Block =>
       val namedElems = scanElements(b.content, ctx)
       val allKeys = namedElems.flatMap(_._1).toSet

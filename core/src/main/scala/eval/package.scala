@@ -1,5 +1,6 @@
 package dev.jtrim777.hcl4s
 
+import dev.jtrim777.hcl4s.lang.struct.BodyElemT.BlockT
 import dev.jtrim777.hcl4s.lang.struct.{Block, HCLSource}
 import dev.jtrim777.hcl4s.model.{HCLBody, HCLValue}
 import dev.jtrim777.hcl4s.util.HCLError.EvaluationException
@@ -7,7 +8,7 @@ import dev.jtrim777.hcl4s.util.HCLError.EvaluationException
 import scala.util.{Failure, Success, Try}
 
 package object eval {
-  type BlockNameStrategy = Block => Option[String]
+  type BlockNameStrategy = BlockT[_] => Option[String]
 
   def evaluate(source: HCLSource, env: Map[String, HCLValue] = Map.empty,
                functions: Map[String, HCLFunction] = Map.empty,

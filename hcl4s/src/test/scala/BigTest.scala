@@ -20,7 +20,12 @@ object BigTest extends App {
       case Right(value) => value
     }
 
-    pprint.pprintln(mainBody)
+    val combinedBody = HCL.fromFile(basePath.resolve("combined.hcl")) match {
+      case Left(value) => throw value
+      case Right(value) => value
+    }
+
+    println(mainBody == combinedBody)
   }
 
   Try(doIt()) match {

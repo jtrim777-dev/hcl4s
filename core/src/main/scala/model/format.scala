@@ -45,6 +45,7 @@ object format {
     case HCLValue.Null => "null"
     case l: HCLValue.HCLList => writeSequence(l, indent, compact)
     case o: HCLValue.HCLObject => writeObject(o, indent, compact)
+    case HCLValue.BlockReference(path) => path.mkString(".")
   }
 
   private[model] def writeSequence(value: HCLValue.HCLList, indent: Int, compact: Boolean): String = {

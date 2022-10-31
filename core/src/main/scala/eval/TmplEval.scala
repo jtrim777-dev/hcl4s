@@ -69,15 +69,15 @@ private[eval] object TmplEval {
     }
   }
 
-  def keysUsed(set: Set[String], tmpl: Template): Set[String] = tmpl.content.flatMap {
+  def keysUsed(set: Set[String], tmpl: Template, ctx: Context): Set[String] = tmpl.content.flatMap {
     case TemplateItem.Literal(_) => Set.empty
-    case TemplateItem.Interpolation(_, value, _) => ExprEval.keysUsed(set, value)
+    case TemplateItem.Interpolation(_, value, _) => ExprEval.keysUsed(set, value, ctx)
     case directive: TemplateItem.Directive => directive match {
       case TemplateItem.TmplIf(_, cond, resolve, alt, _) =>
-        ExprEval.keysUsed(set, cond) ++ keysUsed(set, resolve) ++ alt.map(keysUsed(set, _)).getOrElse(Set.empty)
+        ExprEval.keysUsed(set, cond, ctx) ++ keysUsed(set, resolve, ctx) ++ alt.map(keysUsed(set, _, ctx)).getOrElse(Set.empty)
       case TemplateItem.TmplFor(_, primID, secID, seqExpr, resolve, _) =>
         val ignore = Set(primID) ++ secID.map(Set(_)).getOrElse(Set.empty)
-        ExprEval.keysUsed(set, seqExpr) ++ (keysUsed(set, resolve) -- ignore)
+        ExprEval.keysUsed(set, seqExpr, ctx) ++ (keysUsed(set, resolve, ctx) -- ignore)
     }
   }.toSet
 }

@@ -282,41 +282,42 @@ private[eval] object ExprEval {
     })(tt => toAccess(tt, ext.head))
   }
 
-  def keysUsed(set: Set[String], expr: Expression): Set[String] = expr match {
-    case Expression.WrappedExpr(e) => keysUsed(set, e)
+  def keysUsed(set: Set[String], expr: Expression, ctx: Context): Set[String] = expr match {
+    case Expression.WrappedExpr(e) => keysUsed(set, e, ctx)
     case term: Expression.Term => term match {
       case collection: Expression.Collection => collection match {
-        case Expression.SequenceT(items) => items.flatMap(e => keysUsed(set, e)).toSet
-        case Expression.MappingT(items) => items.flatMap(e => keysUsed(set, e._1) ++ keysUsed(set, e._2)).toSet
+        case Expression.SequenceT(items) => items.flatMap(e => keysUsed(set, e, ctx)).toSet
+        case Expression.MappingT(items) => items.flatMap(e => keysUsed(set, e._1, ctx) ++ keysUsed(set, e._2, ctx)).toSet
       }
       case Expression.Variable(id) => Set(id)
-      case Expression.TmplExpr(template) => TmplEval.keysUsed(set, template)
-      case Expression.FuncCall(_, args) => args.flatMap(e => keysUsed(set, e)).toSet
+      case Expression.TmplExpr(template) => TmplEval.keysUsed(set, template, ctx)
+      case Expression.FuncCall(_, args) => args.flatMap(e => keysUsed(set, e, ctx)).toSet
       case fexpr: Expression.ForExpr => fexpr match {
         case Expression.ForSeqExpr(a, b, seqExpr, valExpr, cond) =>
           val searchKeys: Set[String] = (set - a) -- b.map(Set(_)).getOrElse(Set.empty[String])
-          keysUsed(set, seqExpr) ++ keysUsed(searchKeys, valExpr) ++ cond.map(keysUsed(searchKeys, _)).getOrElse(Set.empty)
+          keysUsed(set, seqExpr, ctx) ++ keysUsed(searchKeys, valExpr, ctx) ++ cond.map(keysUsed(searchKeys, _, ctx)).getOrElse(Set.empty)
         case Expression.ForMapExpr(a, b, seqExpr, keyExpr, valExpr, _, cond) =>
           val searchKeys: Set[String] = (set - a) -- b.map(Set(_)).getOrElse(Set.empty[String])
-          keysUsed(set, seqExpr) ++ keysUsed(searchKeys, valExpr) ++ keysUsed(searchKeys, keyExpr) ++ cond.map(keysUsed(searchKeys, _)).getOrElse(Set.empty)
+          keysUsed(set, seqExpr, ctx) ++ keysUsed(searchKeys, valExpr, ctx) ++ keysUsed(searchKeys, keyExpr, ctx) ++ cond.map(keysUsed(searchKeys, _, ctx)).getOrElse(Set.empty)
       }
       case aterm: Expression.AccessTerm => aterm match {
-        case Expression.Index(target, ind) => keysUsed(set, target) ++ keysUsed(set, ind)
-        case Expression.GetAttr(target, _) => keysUsed(set, target)
+        case Expression.Index(target, ind) => keysUsed(set, target, ctx) ++ keysUsed(set, ind, ctx)
+        case Expression.GetAttr(target, _) => keysUsed(set, target, ctx)
       }
-      case Expression.AttrSplat(target, _) => keysUsed(set, target)
-      case Expression.FullSplat(target, ext) => keysUsed(set, target) ++ ext.flatMap {
-        case Right(value) => keysUsed(set, value)
+      case Expression.AttrSplat(target, _) => keysUsed(set, target, ctx)
+      case Expression.FullSplat(target, ext) => keysUsed(set, target, ctx) ++ ext.flatMap {
+        case Right(value) => keysUsed(set, value, ctx)
         case Left(_) => List.empty
       }.toSet
+      case Expression.BlockRef(b) => ctx.blockNameStrategy(b).map(Set(_)).getOrElse(Set.empty)
       case _: AbsoluteTerm => Set.empty
     }
     case operation: Expression.Operation => operation match {
-      case Expression.UnaryOp(_, target) => keysUsed(set, target)
-      case Expression.BinaryOp(lhs, _, rhs) => keysUsed(set, lhs) ++ keysUsed(set, rhs)
+      case Expression.UnaryOp(_, target) => keysUsed(set, target, ctx)
+      case Expression.BinaryOp(lhs, _, rhs) => keysUsed(set, lhs, ctx) ++ keysUsed(set, rhs, ctx)
     }
     case Expression.Conditional(cond, yesVal, noVal) =>
-      keysUsed(set, cond) ++ keysUsed(set, yesVal) ++ keysUsed(set, noVal)
+      keysUsed(set, cond, ctx) ++ keysUsed(set, yesVal, ctx) ++ keysUsed(set, noVal, ctx)
     case _ => Set.empty
   }
 }

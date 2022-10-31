@@ -5,7 +5,7 @@ import FastparseUtils._
 
 private[parser] object IDHelpers {
   def ID[_: P]: Rule1[String] = P {
-    (("_" | CharAlpha) ~~ (CharAlphaNum | "_" | "$").repX).!
+    (("_" | CharAlpha) ~~ (CharAlphaNum | "_" | "-" | "$").repX).!
   }
 
 //  def ID[_: P]: Rule1[String] = P {
