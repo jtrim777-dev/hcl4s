@@ -78,12 +78,26 @@ private[eval] object ExprEval {
   private def evalConditional(cond: Expression, yesVal: Expression, noVal: Expression, ctx: Context): AbsoluteTerm = {
     val xcond = evaluateExpression(cond, ctx.push(cond))
 
-    xcond match {
-      case Expression.Literal(ValueType.BooleanValue(flag)) => if (flag) {
-        evaluateExpression(yesVal, ctx.push(yesVal))
-      } else evaluateExpression(noVal, ctx.push(noVal))
-      case _ => ctx.throwError("Conditional Expressions must resolved to a boolean value")
+    val truthy = xcond match {
+      case Expression.Literal(value) => value match {
+        case value: ValueType.NumericValue[_] => value match {
+          case ValueType.IntegerValue(value) => value != 0
+          case ValueType.FloatingValue(value) => value != 0
+        }
+        case ValueType.BooleanValue(value) => value
+        case ValueType.NullValue => false
+      }
+      case AttrKey(value) => value.nonEmpty
+      case collection: AbsoluteCollection => collection match {
+        case Expression.AbsSequence(items) => items.nonEmpty
+        case Expression.AbsMapping(items) => items.nonEmpty
+      }
+      case Expression.ResolvedTmpl(value) => value.nonEmpty
     }
+
+    if (truthy) {
+      evaluateExpression(yesVal, ctx.push(yesVal))
+    } else evaluateExpression(noVal, ctx.push(noVal))
   }
 
   private def evalFuncCall(func: String, args: List[Expression], ctx: Context): AbsoluteTerm = {
@@ -262,6 +276,7 @@ private[eval] object ExprEval {
   }
 
   def keysUsed(set: Set[String], expr: Expression): Set[String] = expr match {
+    case Expression.WrappedExpr(e) => keysUsed(set, e)
     case term: Expression.Term => term match {
       case collection: Expression.Collection => collection match {
         case Expression.SequenceT(items) => items.flatMap(e => keysUsed(set, e)).toSet

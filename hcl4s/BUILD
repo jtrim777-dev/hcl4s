@@ -36,6 +36,16 @@ deploy_maven(
 )
 
 scala_binary(
+    name = "bigtest",
+    srcs = ["src/test/scala/BigTest.scala"],
+    main_class = "dev.jtrim777.hcl4s.BigTest",
+    deps = [
+        ":full-lib",
+        "@third_party//3rdparty/jvm/com/lihaoyi:pprint",
+    ],
+)
+
+scala_binary(
     name = "repl",
     srcs = [],
     main_class = "ammonite.Main",

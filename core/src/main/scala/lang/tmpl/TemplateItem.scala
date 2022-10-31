@@ -16,13 +16,13 @@ object TemplateItem {
 
     override val traceType: String = "text literal"
     override def traceDisplay: String = value
-    override def shortDisplay: String = "..."
+    override def shortDisplay: String = value.take(10).replace("\n", "") + "..."
   }
 
   case class Interpolation(stripStart: Boolean, value: Expression, stripEnd: Boolean) extends TemplateItem {
     override val traceType: String = "interpolation"
     override def traceDisplay: String = s"$${${value.traceDisplay}}"
-    override def shortDisplay: String = "$${...}"
+    override def shortDisplay: String = s"$${${value.shortDisplay}}"
   }
 
   sealed trait Directive extends TemplateItem {
@@ -42,6 +42,6 @@ object TemplateItem {
                      resolve: Template, stripEnd: Boolean) extends Directive {
     override val traceType: String = "for directive"
     override def traceDisplay: String = s"%{ for $primID${secID.map(s => ", " + s).getOrElse("")} in ${seqExpr.traceDisplay} } ${resolve.traceDisplay} %{ endfor }"
-    override def shortDisplay: String = "%{ for $primID${secID.map(s => \", \" + s).getOrElse(\"\")} in ... } ... %{ endfor }"
+    override def shortDisplay: String = s"%{ for $primID${secID.map(s => ", " + s).getOrElse("")} in ${seqExpr.shortDisplay} } ... %{ endfor }"
   }
 }

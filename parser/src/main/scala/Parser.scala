@@ -12,7 +12,7 @@ import scala.collection.mutable
 import fastparse._, JavaWhitespace._
 import FastparseUtils._, IDHelpers._
 
-private[parser] object Parser {
+/*private[parser] */object Parser {
   var doLog = false
 //  val log: mutable.Buffer[String] = collection.mutable.Buffer.empty[String]
   implicit val logger: Logger = Logger(inp => if (doLog) println(inp) else ())
@@ -114,7 +114,7 @@ private[parser] object Parser {
   }.log
 
   def TermCore[_: P]: Rule1[expr.Term] = P {
-    LitVal | CollVal | Template | Variable | FxCall | ForExpr | ("(" ~/ Expression ~ ")" ~> expr.WrappedExpr)
+    LitVal | CollVal | Template | FxCall | Variable | ForExpr | ("(" ~/ Expression ~ ")" ~> expr.WrappedExpr)
   }.log
 
   def Term[_: P]: Rule1[expr.Term] = P {
@@ -141,7 +141,7 @@ private[parser] object Parser {
   }.log
 
   def Conditional[_: P]: Rule1[expr] = P {
-    NoCut(Term ~ "?") ~/ Term ~ ":" ~/ Term ~> {case (e1:expr.Term, e2:expr.Term, e3:expr.Term) => expr.Conditional(e1,e2,e3)}
+    NoCut(Term ~ "?") ~/ Expression ~ ":" ~/ Expression ~> {case (e1:expr.Term, e2:expr, e3:expr) => expr.Conditional(e1,e2,e3)}
   }.log
 
   def Expression[_: P]: Rule1[expr] = P {
@@ -149,7 +149,7 @@ private[parser] object Parser {
   }.log
 
   def Attribute[_: P]: Rule1[struct.Attribute] = P {
-    ID ~ "=" ~ Expression  ~> {case (id:String, exp: expr) => struct.BodyElemT.AttributeT(id, exp)}
+    ID ~ "=" ~/ Expression  ~> {case (id:String, exp: expr) => struct.BodyElemT.AttributeT(id, exp)}
   }.log
 
 //  def OLBlock[_: P]: Rule1[struct.Block] = P {

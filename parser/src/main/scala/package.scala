@@ -20,7 +20,7 @@ package object parser {
   def attemptParse(source: String): Either[HCLError.ParsingFailure, HCLSource] = {
     libparse(source, Parser.HCL(_)) match {
       case Parsed.Success(value, _) => Right(value)
-      case failure: Parsed.Failure => Left(HCLError.ParsingFailure(failure.toString()))
+      case failure: Parsed.Failure => Left(HCLError.ParsingFailure(failure.toString(), failure))
     }
   }
 
@@ -38,7 +38,7 @@ package object parser {
   def attemptParseTemplate(source: String): Either[HCLError.ParsingFailure, Expression.TmplExpr] = {
     libparse(source, TemplateParser.Template(_)) match {
       case Parsed.Success(value, _) => Right(Expression.TmplExpr(value))
-      case failure: Parsed.Failure => Left(HCLError.ParsingFailure(failure.toString()))
+      case failure: Parsed.Failure => Left(HCLError.ParsingFailure(failure.toString(), failure))
     }
   }
 

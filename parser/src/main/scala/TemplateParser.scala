@@ -8,7 +8,7 @@ import fastparse._, NoWhitespace._
 import FastparseUtils._
 import IDHelpers.ID
 
-private[parser] object TemplateParser {
+object TemplateParser {
   def Expression[_: P]: Rule1[expr] = Parser.Expression
 
   def space[_: P]: Rule0 = P( CharsWhileIn(" \r\n\t", 0) )
@@ -27,19 +27,19 @@ private[parser] object TemplateParser {
   }
 
   def IfElse[_: P]: Rule1[tmpl] = P {
-    escape("%") ~/ "else" ~ endEscape ~ Template ~> {t => t._3}
+    escape("%") ~ "else" ~ endEscape ~ Template ~> {t => t._3}
   }
   def IfDirective[_: P]: Rule1[tmpli.TmplIf] = P {
-    escape("%") ~/ "if" ~/ needSpace ~ Expression ~ endEscape ~
-      Template ~ IfElse.? ~
-      escape("%") ~/ "endif" ~/ endEscape ~>
+    escape("%") ~ "if" ~/ needSpace ~ Expression ~ endEscape ~
+      InnerTemplate ~ IfElse.? ~
+      escape("%") ~ "endif" ~/ endEscape ~>
       {data => tmpli.TmplIf(data._1, data._2, data._4, data._5, data._7)}
   } // TODO: Make stripping work properly
 
   def ForDirective[_: P]: Rule1[tmpli.TmplFor] = P {
-    escape("%") ~/ "for" ~ needSpace ~/ ID ~ ("," ~ space ~/ ID ~ needSpace).? ~ "in" ~ needSpace ~ Expression ~ endEscape ~
-      Template ~
-      escape("%") ~/ "endfor" ~ endEscape ~>
+    escape("%") ~ "for" ~ needSpace ~/ ID ~ (space ~ "," ~ space ~/ ID).? ~ needSpace ~ "in" ~ needSpace ~ Expression ~ endEscape ~
+      InnerTemplate ~
+      escape("%") ~ "endfor" ~ endEscape ~>
       {data => tmpli.TmplFor(data._1, data._2, data._3, data._4, data._6, data._8)}
   }
 
@@ -59,6 +59,10 @@ private[parser] object TemplateParser {
 
   def TemplateItem[_: P]: Rule1[tmpli] = P {
     Interpolation | Directive | Literal
+  }
+
+  def InnerTemplate[_: P]: Rule1[tmpl] = P {
+    TemplateItem.repX(1) ~> {items => tmpl(items.toList)}
   }
 
   def Template[_: P]: Rule1[tmpl] = P {

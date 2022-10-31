@@ -167,7 +167,7 @@ object Expression {
     override def shortDisplay: String = s"${rhs.shortDisplay}${op.id}${rhs.shortDisplay}"
   }
 
-  case class Conditional(cond: Term, yesVal: Term, noVal: Term) extends Expression {
+  case class Conditional(cond: Term, yesVal: Expression, noVal: Expression) extends Expression {
     override def traceType: String = "conditional"
     override def traceDisplay: String = s"${cond.traceDisplay} ? ${yesVal.traceDisplay} : ${noVal.traceDisplay}"
     override def shortDisplay: String = s"${cond.shortDisplay} ? ... : ..."

@@ -9,8 +9,9 @@ import dev.jtrim777.hcl4s.util.Trace
 
 object HCLEval {
   def evaluate(source: HCLSource, externalVariables: Map[String, HCLValue] = Map.empty,
-               functions: Map[String, HCLFunction] = Map.empty, scopeBlockTags: Boolean = true): HCLBody = {
-    val output = innerEvaluate(source, externalVariables.map(p => (p._1, valueToTerm(p._2))), functions, scopeBlockTags)
+               functions: Map[String, HCLFunction] = Map.empty, scopeBlocks: Boolean = true,
+               blockNameStrategy: Block => Option[String] = Context.DefaultBNStrat): HCLBody = {
+    val output = innerEvaluate(source, externalVariables.map(p => (p._1, valueToTerm(p._2))), functions, scopeBlocks, blockNameStrategy)
 
     convertBlock(output).body
   }
@@ -55,9 +56,10 @@ object HCLEval {
   }
 
   private def innerEvaluate(hcl: HCLSource, scope: Map[String, AbsoluteTerm],
-               functions: Map[String, HCLFunction], scopeBlockTags: Boolean): ResolvedBlock = {
+               functions: Map[String, HCLFunction], scopeBlocks: Boolean,
+                            blockNameStrategy: Block => Option[String]): ResolvedBlock = {
     val rootBlock = BlockT(".", List.empty, hcl.elements)
-    val ctx = Context(ScopeStack(scope), Trace.empty, functions, scopeBlockTags)
+    val ctx = Context(ScopeStack(scope), Trace.empty, functions, scopeBlocks, blockNameStrategy)
 
     evaluateBlock(rootBlock, ctx)
   }
@@ -95,7 +97,7 @@ object HCLEval {
         if (result.contains(key)) {
           ctx.throwError("Mutual recursion found in resolution dependencies") // TODO: Scope to value
         } else result
-      } else found
+      } else Set.empty
     }
 
     val ordered = namedElems.sortWith { case ((name1, _), (name2, _)) =>
@@ -116,8 +118,8 @@ object HCLEval {
           (rez, ctx)
         case b:Block =>
           val rez = evaluateBlock(b, ictx.push(b))
-          val key = b.kind :: b.labels
-          val ctx = name.map(_ => ictx.enscope(key, elemToValue(rez, ictx))).getOrElse(ictx)
+          val key = ictx.blockNameStrategy(b).map(_.split('.'))
+          val ctx = key.map(path => ictx.enscope(path.toList, elemToValue(rez, ictx))).getOrElse(ictx)
           (rez, ctx)
       }
       val naccum = resolved :: accum
@@ -131,9 +133,9 @@ object HCLEval {
   private def scanElements[T <: Expression](elements: List[BodyElemT[T]], ctx: Context): List[(Option[String], BodyElemT[T])] = {
     elements.map {
       case a: Attribute => Some(a.name) -> a
-      case b: Block => if (ctx.scopeBlockTags) {
-        val k = b.kind + (if (b.labels.nonEmpty) b.labels.mkString(".", ".", "") else "")
-        Some(k) -> b
+      case b: Block => if (ctx.scopeBlocks) {
+        val k = ctx.blockNameStrategy(b)
+        k -> b
       } else None -> b
     }
   }
