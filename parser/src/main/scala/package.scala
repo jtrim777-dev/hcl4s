@@ -1,5 +1,6 @@
 package dev.jtrim777.hcl4s
 
+import cats.effect.IO
 import dev.jtrim777.hcl4s.lang.expr.Expression
 import dev.jtrim777.hcl4s.lang.struct.HCLSource
 import dev.jtrim777.hcl4s.util.HCLError
@@ -16,6 +17,10 @@ package object parser {
   }
 
   def load(path: Path): HCLSource = parse(Files.readString(path))
+
+  def loadSecret(path: Path, key: String): IO[HCLSource] = {
+    Secretive.loadSecretKey(key).flatMap(sk => Secretive.decodeFromFile(path, sk)).map(parse)
+  }
 
   def attemptParse(source: String): Either[HCLError.ParsingFailure, HCLSource] = {
     libparse(source, Parser.HCL(_)) match {

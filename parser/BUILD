@@ -6,11 +6,13 @@ scala_library(
         "//core:lang-lib",
         "//core:util-lib",
         "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
+        "@third_party//3rdparty/jvm/org/typelevel:cats_effect",
     ],
     deps = [
         "//core:lang-lib",
         "//core:util-lib",
         "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
+        "@third_party//3rdparty/jvm/org/typelevel:cats_effect",
     ],
 )
 

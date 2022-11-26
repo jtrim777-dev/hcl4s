@@ -41,3 +41,9 @@ dependencies:
   org.scala-lang.modules:
     scala-xml:
       lang: scala
+
+  org.typelevel:
+    cats:
+      lang: scala
+      modules: [ "core", "effect" ]
+      version: "2.1.1"
