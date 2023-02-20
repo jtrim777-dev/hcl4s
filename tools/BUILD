@@ -27,9 +27,9 @@ declare_deps_provider(
     deps_id = "scala_compile_classpath",
     visibility = ["//visibility:public"],
     deps = [
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_compiler",
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_library",
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_reflect",
+        "@ext//org/scala_lang:scala_compiler",
+        "@ext//org/scala_lang:scala_library",
+        "@ext//org/scala_lang:scala_reflect",
     ],
 )
 
@@ -37,8 +37,8 @@ declare_deps_provider(
     name = "cp_scala_lib",
     deps_id = "scala_library_classpath",
     deps = [
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_library",
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_reflect",
+        "@ext//org/scala_lang:scala_library",
+        "@ext//org/scala_lang:scala_reflect",
     ],
 )
 
@@ -46,19 +46,19 @@ declare_deps_provider(
     name = "cp_scala_macro",
     deps_id = "scala_macro_classpath",
     deps = [
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_library",
-        "@third_party//3rdparty/jvm/org/scala_lang:scala_reflect",
+        "@ext//org/scala_lang:scala_library",
+        "@ext//org/scala_lang:scala_reflect",
     ],
 )
 
 declare_deps_provider(
     name = "cp_scala_xml",
     deps_id = "scala_xml",
-    deps = ["@third_party//3rdparty/jvm/org/scala_lang/modules:scala_xml"],
+    deps = ["@ext//org/scala_lang/modules:scala_xml"],
 )
 
 #declare_deps_provider(
 #    name = "cp_scala_parsers",
 #    deps_id = "parser_combinators",
-#    deps = ["@third_party//3rdparty/jvm/org/scala_lang/modules:scala_parser_combinators_2_13"],
+#    deps = ["@ext//org/scala_lang/modules:scala_parser_combinators_2_13"],
 #)

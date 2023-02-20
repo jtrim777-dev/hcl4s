@@ -3,6 +3,7 @@ package dev.jtrim777.hcl4s
 import dev.jtrim777.hcl4s.model.{HCLBody, HCLValue}
 
 package object codec {
+
   implicit class OnValuable[T : ValueEncoder](obj: T) {
     def asHCLValue: HCLValue = implicitly[ValueEncoder[T]].encodeValue(obj)
   }

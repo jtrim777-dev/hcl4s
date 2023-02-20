@@ -20,10 +20,10 @@ scala_library(
     name = "model-lib",
     srcs = glob(["src/main/scala/model/*.scala"]),
     deps = [
-        "@third_party//3rdparty/jvm/org/apache/commons:commons_text",
+        "@ext//org/apache/commons:commons_text",
     ],
     exports = [
-        "@third_party//3rdparty/jvm/org/apache/commons:commons_text",
+        "@ext//org/apache/commons:commons_text",
     ],
     visibility = ["//:__subpackages__"]
 )
@@ -44,17 +44,32 @@ scala_library(
 )
 
 scala_library(
+    name = "codec-lib",
+    srcs = glob(["src/main/scala/codec/*.scala"]),
+    deps = [
+        ":lang-lib",
+        ":model-lib",
+    ],
+    exports = [
+        ":lang-lib",
+        ":model-lib",
+    ],
+)
+
+scala_library(
   name = "core-lib",
   srcs = [],
   exports = [
     ":lang-lib",
     ":model-lib",
     ":eval-lib",
+    ":codec-lib",
   ],
   deps = [
     ":lang-lib",
     ":model-lib",
     ":eval-lib",
+    ":codec-lib",
   ],
   visibility = ["//visibility:public"],
   tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-core_2.13:{pom_version}"],
@@ -84,6 +99,6 @@ scala_binary(
     main_class = "ammonite.Main",
     deps = [
         ":core-lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:ammonite_2_13_8",
+        "@ext//com/lihaoyi:ammonite_2_13_8",
     ],
 )

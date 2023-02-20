@@ -5,13 +5,14 @@ scala_library(
     srcs = glob(["src/main/scala/**/*.scala"]),
     deps = [
         "//core:core-lib",
-        "@third_party//3rdparty/jvm/com/chuusai:shapeless",
+        "@ext//com/chuusai:shapeless",
     ],
     exports = [
         "//core:core-lib",
-        "@third_party//3rdparty/jvm/com/chuusai:shapeless",
+        "@ext//com/chuusai:shapeless",
     ],
     visibility = ["//visibility:public"],
+    tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-generic_2.13:{pom_version}"],
 )
 
 assemble_maven(

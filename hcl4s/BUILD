@@ -39,7 +39,7 @@ scala_binary(
     main_class = "dev.jtrim777.hcl4s.BigTest",
     deps = [
         ":full-lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:pprint",
+        "@ext//com/lihaoyi:pprint",
     ],
 )
 
@@ -49,6 +49,6 @@ scala_binary(
     main_class = "ammonite.Main",
     deps = [
         ":full-lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:ammonite_2_13_8",
+        "@ext//com/lihaoyi:ammonite_2_13_8",
     ],
 )

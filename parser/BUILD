@@ -7,14 +7,14 @@ scala_library(
     exports = [
         "//core:lang-lib",
         "//core:util-lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
-        "@third_party//3rdparty/jvm/org/typelevel:cats_effect",
+        "@ext//com/lihaoyi:fastparse",
+        "@ext//org/typelevel:cats_effect",
     ],
     deps = [
         "//core:lang-lib",
         "//core:util-lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
-        "@third_party//3rdparty/jvm/org/typelevel:cats_effect",
+        "@ext//com/lihaoyi:fastparse",
+        "@ext//org/typelevel:cats_effect",
     ],
     tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-parser_2.13:{pom_version}"],
 )
@@ -42,7 +42,7 @@ scala_binary(
     srcs = ["src/test/scala/TestParse.scala"],
     deps = [
         "//parser:lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:pprint",
+        "@ext//com/lihaoyi:pprint",
     ],
     main_class = "dev.jtrim777.hcl4s.parser.TestParse",
 )
@@ -53,6 +53,6 @@ scala_binary(
     main_class = "ammonite.Main",
     deps = [
         ":lib",
-        "@third_party//3rdparty/jvm/com/lihaoyi:ammonite_2_13_8",
+        "@ext//com/lihaoyi:ammonite_2_13_8",
     ],
 )
