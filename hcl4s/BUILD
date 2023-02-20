@@ -6,12 +6,10 @@ scala_library(
   exports = [
     "//core:core-lib",
     "//parser:lib",
-    "//codec:lib",
   ],
   deps = [
     "//core:core-lib",
     "//parser:lib",
-    "//codec:lib",
   ],
   visibility = ["//visibility:public"],
   tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s_2.13:{pom_version}"],

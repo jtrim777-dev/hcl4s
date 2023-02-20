@@ -1,3 +1,5 @@
+load("@bazeldist//maven:rules.bzl", "deploy_maven", "assemble_maven")
+
 scala_library(
     name = "lib",
     srcs = glob(["src/main/scala/*.scala"]),
@@ -14,6 +16,25 @@ scala_library(
         "@third_party//3rdparty/jvm/com/lihaoyi:fastparse",
         "@third_party//3rdparty/jvm/org/typelevel:cats_effect",
     ],
+    tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-parser_2.13:{pom_version}"],
+)
+
+assemble_maven(
+    name = "assemble",
+    target = ":lib",
+    project_name = "hcl4s-parser",
+    project_description = "Syntax parser and loader for HCL",
+    scm_url = "https://github.com/jtrim777-dev/hcl4s",
+    version_file = "//parser:VERSION",
+    license = "mit",
+    workspace_refs = "@repo_workspace_refs//:refs.json"
+)
+
+deploy_maven(
+    name = "deploy",
+    target = ":assemble",
+    release = "https://maven.jtrim777.dev/releases",
+    snapshot = "https://maven.jtrim777.dev/releases",
 )
 
 scala_binary(

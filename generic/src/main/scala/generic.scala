@@ -1,7 +1,8 @@
-package dev.jtrim777.hcl4s.codec
+package dev.jtrim777.hcl4s.generic
 
 import shapeless.{::, HList, HNil, LabelledGeneric, Lazy, Witness, Coproduct, CNil, :+:, Inl, Inr}
 import shapeless.labelled.{FieldType, field}
+import dev.jtrim777.hcl4s.codec._
 
 object generic {
 
