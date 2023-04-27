@@ -5,11 +5,15 @@ scala_library(
     srcs = glob(["src/main/scala/**/*.scala"]),
     deps = [
         "//core:core-lib",
-        "@ext//com/chuusai:shapeless",
+#        "@ext//com/chuusai:shapeless",
+        "@ext//io/circe:circe_core",
+        "@ext//io/circe:circe_generic",
     ],
     exports = [
         "//core:core-lib",
-        "@ext//com/chuusai:shapeless",
+#        "@ext//com/chuusai:shapeless",
+        "@ext//io/circe:circe_core",
+        "@ext//io/circe:circe_generic",
     ],
     visibility = ["//visibility:public"],
     tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-generic_2.13:{pom_version}"],

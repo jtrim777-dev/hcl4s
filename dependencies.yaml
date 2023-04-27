@@ -29,6 +29,12 @@ dependencies:
       lang: scala
       version: "0.8.0"
 
+  io.circe:
+    circe:
+      lang: scala
+      modules: [ "core", "generic" ]
+      version: "0.14.1"
+
   org.apache.commons:
     commons-text:
       lang: java
