@@ -23,7 +23,7 @@ assemble_maven(
     project_name = "hcl4s",
     project_description = "Scala parser and interpreter for HCL",
     scm_url = "https://github.com/jtrim777-dev/hcl4s",
-    version_file = "//hcl4s:VERSION",
+    version_file = "//:VERSION",
     license = "mit",
     workspace_refs = "@repo_workspace_refs//:refs.json"
 )
@@ -41,6 +41,17 @@ scala_binary(
     main_class = "dev.jtrim777.hcl4s.BigTest",
     deps = [
         ":full-lib",
+        "@ext//com/lihaoyi:pprint",
+    ],
+)
+
+scala_binary(
+    name = "rtest",
+    srcs = ["src/test/scala/ResumeTest.scala"],
+    main_class = "dev.jtrim777.hcl4s.ResumeTest",
+    deps = [
+        ":full-lib",
+        "//extensions/json:lib",
         "@ext//com/lihaoyi:pprint",
     ],
 )

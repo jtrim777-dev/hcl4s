@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+bazel run //core:deploy -- release
+bazel run //parser:deploy -- release
+bazel run //generic:deploy -- release
+bazel run //hcl4s:deploy -- release
+bazel run //extensions/json:deploy -- release

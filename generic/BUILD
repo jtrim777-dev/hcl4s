@@ -25,7 +25,7 @@ assemble_maven(
     project_name = "hcl4s generic",
     project_description = "Generic Codec Derivation for hcl4s",
     scm_url = "https://github.com/jtrim777-dev/hcl4s",
-    version_file = "//generic:VERSION",
+    version_file = "//:VERSION",
     license = "mit",
     workspace_refs = "@repo_workspace_refs//:refs.json"
 )

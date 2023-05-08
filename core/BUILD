@@ -81,7 +81,7 @@ assemble_maven(
     project_name = "hcl4s-core",
     project_description = "Scala models, DSL, and interpreter for HCL",
     scm_url = "https://github.com/jtrim777-dev/hcl4s",
-    version_file = "//core:VERSION",
+    version_file = "//:VERSION",
     license = "mit",
     workspace_refs = "@repo_workspace_refs//:refs.json"
 )
