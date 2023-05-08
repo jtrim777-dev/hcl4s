@@ -16,6 +16,7 @@ jobs:
         with:
           tag: ${{ github.event.release.tag_name }}
           version_file: "VERSION"
+          version_sub_files: ""
           bazel_targets: "//core:deploy,//parser:deploy,//generic:deploy,//hcl4s:deploy,//extensions/json:deploy"
           email: "jatrimble777@gmail.com"
           github_token: ${{ secrets.XREPO_TOKEN }}
