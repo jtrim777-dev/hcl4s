@@ -1,4 +1,4 @@
-load("@rules_scala//rules/register_toolchain.bzl")
+load("@rules_scala_annex//rules:register_toolchain.bzl", "register_bootstrap_toolchain")
 
 compiler_classpath_2_13 = [
     "@maven//:org_scala_lang_scala_compiler",

@@ -22,7 +22,7 @@ maven.install(
 
 use_repo(maven, "maven")
 
-bazel_dep(name = "rules_scala_annex", repo_name = "rules_scala")
+bazel_dep(name = "rules_scala_annex")
 rules_scala_version = "782f59069f8ae5e7ceb45ade111bbe07f82d0ae2"
 rules_scala_sha = ""
 archive_override(

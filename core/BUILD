@@ -1,4 +1,4 @@
-load("@bazeldist//maven:rules.bzl", "deploy_maven", "assemble_maven")
+# load("@bazeldist//maven:rules.bzl", "deploy_maven", "assemble_maven")
 
 scala_library(
     name = "util-lib",
@@ -20,10 +20,10 @@ scala_library(
     name = "model-lib",
     srcs = glob(["src/main/scala/model/*.scala"]),
     deps = [
-        "@ext//org/apache/commons:commons_text",
+        "@maven//:org_apache_commons_commons_text",
     ],
     exports = [
-        "@ext//org/apache/commons:commons_text",
+        "@maven//:org_apache_commons_commons_text",
     ],
     visibility = ["//:__subpackages__"]
 )
@@ -74,31 +74,31 @@ scala_library(
   visibility = ["//visibility:public"],
   tags = ["maven_coordinates=dev.jtrim777.hcl4s:hcl4s-core_2.13:{pom_version}"],
 )
-
-assemble_maven(
-    name = "assemble",
-    target = ":core-lib",
-    project_name = "hcl4s-core",
-    project_description = "Scala models, DSL, and interpreter for HCL",
-    scm_url = "https://github.com/jtrim777-dev/hcl4s",
-    version_file = "//:VERSION",
-    license = "mit",
-    workspace_refs = "@repo_workspace_refs//:refs.json"
-)
-
-deploy_maven(
-    name = "deploy",
-    target = ":assemble",
-    release = "https://maven.jtrim777.dev/releases",
-    snapshot = "https://maven.jtrim777.dev/releases",
-)
-
-scala_binary(
-    name = "repl",
-    srcs = [],
-    main_class = "ammonite.Main",
-    deps = [
-        ":core-lib",
-        "@ext//com/lihaoyi:ammonite_2_13_8",
-    ],
-)
+#
+# assemble_maven(
+#     name = "assemble",
+#     target = ":core-lib",
+#     project_name = "hcl4s-core",
+#     project_description = "Scala models, DSL, and interpreter for HCL",
+#     scm_url = "https://github.com/jtrim777-dev/hcl4s",
+#     version_file = "//:VERSION",
+#     license = "mit",
+#     workspace_refs = "@repo_workspace_refs//:refs.json"
+# )
+#
+# deploy_maven(
+#     name = "deploy",
+#     target = ":assemble",
+#     release = "https://maven.jtrim777.dev/releases",
+#     snapshot = "https://maven.jtrim777.dev/releases",
+# )
+#
+# scala_binary(
+#     name = "repl",
+#     srcs = [],
+#     main_class = "ammonite.Main",
+#     deps = [
+#         ":core-lib",
+#         "@ext//com/lihaoyi:ammonite_2_13_8",
+#     ],
+# )
