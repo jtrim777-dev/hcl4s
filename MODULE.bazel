@@ -1,0 +1,37 @@
+bazel_dep(name = "rules_jvm_external", version = "6.6")
+maven = use_extension("@rules_jvm_external//:extensions.bzl", "maven")
+
+maven.install(
+	artifacts = [
+		"org.scala-lang:scala-compiler:2.13.8",
+    "org.scala-lang:scala-library:2.13.8",
+    "org.scala-lang:scala-reflect:2.13.8",
+		"com.chuusai:shapeless_2.13:2.3.3",
+    "com.lihaoyi:ammonite_2.13.8:2.5.5",
+    "com.lihaoyi:fastparse_2.13:2.2.2",
+    "com.lihaoyi:pprint_2.13:0.8.0",
+    "io.circe:circe-core_2.13:0.14.1",
+    "io.circe:circe-generic_2.13:0.14.1",
+    "org.apache.commons:commons-text:1.10.0",
+    "org.typelevel:cats-core_2.13:2.1.1",
+    "org.typelevel:cats-effect_2.13:2.1.1",
+
+	],
+	lock_file = "//:MVNLOCK.json"
+)
+
+use_repo(maven, "maven")
+
+bazel_dep(name = "rules_scala_annex", repo_name = "rules_scala")
+rules_scala_version = "782f59069f8ae5e7ceb45ade111bbe07f82d0ae2"
+rules_scala_sha = ""
+archive_override(
+	module_name = "rules_scala_annex",
+	integrity = rules_scala_sha,
+	strip_prefix = "rules_scala-{}".format(rules_scala_version),
+	url = "https://github.com/lucidsoftware/rules_scala/archive/{}.zip".format(rules_scala_version)
+)
+
+register_toolchains(
+	"//tools:scala_2_13_8"
+)

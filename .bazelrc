@@ -1,1 +1,2 @@
 build --incompatible_java_common_parameters=false
+common --@rules_scala_annex//rules/scala:scala-toolchain=scala_2_13_8
